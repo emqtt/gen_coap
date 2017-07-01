@@ -60,8 +60,9 @@ start_dtls(Name, DtlsOpts) ->
 start_dtls(Name, DtlsPort, DtlsOpts) ->
     supervisor:start_child(?MODULE,
         {Name,
-            {coap_dtls_listen, start_link, [DtlsPort, DtlsOpts]},
-            transient, 5000, worker, []}).
+            {coap_dtls_listen_sup, start_link, [DtlsPort, DtlsOpts]},
+            transient, infinity, supervisor, [Name]}).
+    
 
 stop_dtls(Name) ->
     supervisor:terminate_child(?MODULE, Name),
