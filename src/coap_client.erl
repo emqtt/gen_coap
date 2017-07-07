@@ -34,9 +34,10 @@ request(Method, Uri, Content) ->
 
 request(Method, Uri, Content, Options) ->
     {Scheme, ChId, Path, Query} = resolve_uri(Uri),
+    EncodedPath = encode_path(Path, []),
     channel_apply(Scheme, ChId,
         fun(Channel) ->
-            request_block(Channel, Method, [{uri_path, Path}, {uri_query, Query} | Options], Content)
+            request_block(Channel, Method, [{uri_path, EncodedPath}, {uri_query, Query} | Options], Content)
         end).
 
 request_block(Channel, Method, ROpt, Content) ->
@@ -132,6 +133,12 @@ channel_apply(coaps, {Host, Port}, Fun) ->
     coap_channel:close(Channel),
     coap_dtls_socket:close(Sock),
     Res.
+
+encode_path([], Acc) ->
+    lists:reverse(Acc);
+encode_path([H|T], Acc) ->
+    encode_path(T, [http_uri:encode(H)|Acc]).
+
 
 -include_lib("eunit/include/eunit.hrl").
 

@@ -42,6 +42,7 @@ stop(Pid) ->
 
 init([Client, Uri, Options]) ->
     {Scheme, ChId, Path, Query} = coap_client:resolve_uri(Uri),
+    EncodedPath = encode_path(Path, []),
     {ok, Sock, Channel} = case Scheme of
         coap ->
             {ok, So} = coap_udp_socket:start_link(),
@@ -52,7 +53,7 @@ init([Client, Uri, Options]) ->
             coap_dtls_socket:connect(Host, Port)
     end,
     % observe the resource
-    ROpt = [{uri_path, Path}, {uri_query, Query}|Options],
+    ROpt = [{uri_path, EncodedPath}, {uri_query, Query}|Options],
     {ok, Ref} = coap_channel:send(Channel,
         coap_message:request(con, get, <<>>, [{observe, 0}|ROpt])),
     {ok, #state{client=Client, scheme=Scheme, sock=Sock, channel=Channel, ropt=ROpt, ref=Ref}}.
@@ -141,5 +142,12 @@ send_notify(Message=#coap_message{method={ok, Code}, options=Options},
             % ignore, but stay subscribed
             {noreply, State}
     end.
+
+
+encode_path([], Acc) ->
+    lists:reverse(Acc);
+encode_path([H|T], Acc) ->
+    encode_path(T, [http_uri:encode(H)|Acc]).
+
 
 % end of file
