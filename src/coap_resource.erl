@@ -16,7 +16,7 @@
     [coap_uri()].
 
 % GET handler
--callback coap_get(coap_channel_id(), [binary()], [binary()], [binary()]) ->
+-callback coap_get(coap_channel_id(), [binary()], [binary()], [binary()], any()) ->
     coap_content() | {'error', atom()}.
 % POST handler
 -callback coap_post(coap_channel_id(), [binary()], [binary()], coap_content()) ->
