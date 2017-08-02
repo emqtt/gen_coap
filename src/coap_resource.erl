@@ -29,7 +29,7 @@
     'ok' | {'error', atom()}.
 
 % observe request handler
--callback coap_observe(coap_channel_id(), [binary()], [binary()], boolean()) ->
+-callback coap_observe(coap_channel_id(), [binary()], [binary()], boolean(), any()) ->
     {'ok', any()} | {'error', atom()}.
 % cancellation request handler
 -callback coap_unobserve(any()) ->
