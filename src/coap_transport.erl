@@ -19,7 +19,7 @@
 -define(MAX_RETRANSMIT, 4).
 
 -define(PROCESSING_DELAY, 1000). % standard allows 2000
--define(EXCHANGE_LIFETIME, 247000).
+-define(EXCHANGE_LIFETIME, 20000).
 -define(NON_LIFETIME, 145000).
 
 -record(state, {phase, sock, cid, channel, tid, resp, receiver, msg, timer, retry_time, retry_count}).
@@ -148,6 +148,9 @@ go_pack_sent(Ack, State=#state{sock=Sock, cid=ChId}) ->
 pack_sent({in, _BinMessage}, State=#state{sock=Sock, cid=ChId, msg=BinAck}) ->
     % retransmit the ack
     Sock ! {datagram, ChId, BinAck},
+    next_state(pack_sent, State);
+pack_sent({timeout, await_aack}, State) ->
+    % ignore this timeout since it is produced by a race condition
     next_state(pack_sent, State).
 
 % --- outgoing CON->ACK|RST
@@ -185,6 +188,9 @@ await_pack({timeout, await_pack}, State=#state{tid={out, _MsgId}, msg=Message}) 
 
 aack_sent({in, _Ack}, State) ->
     % ignore ack retransmission
+    next_state(aack_sent, State);
+aack_sent({timeout, await_pack}, State) ->
+    % ignore this time which is due to race condition
     next_state(aack_sent, State).
 
 % utility functions
