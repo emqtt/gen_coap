@@ -154,9 +154,10 @@ handle_info(Info, State) ->
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
-terminate(_Reason, #state{sup=SupPid, sock=SockPid, cid=ChId}) ->
+terminate(_Reason, #state{sup=SupPid, cid=ChId}) ->
     %io:fwrite("channel ~p finished ~p~n", [ChId, Reason]),
-    SockPid ! {terminated, SupPid, ChId},
+    coap_udp_socket:delete_channel(ChId),
+    exit(SupPid, normal),
     ok.
 
 
