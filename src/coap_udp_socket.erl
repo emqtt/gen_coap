@@ -102,7 +102,12 @@ handle_info({udp, Socket, PeerIP, PeerPortNo, Data}, State=#state{pool=PoolPid})
                 {error, {already_started, SuPid}} ->
                     % this process is created, and its pid is writing into ets table now, and find_channel() will return undefined
                     ChPid = coap_channel_sup:get_channel(SuPid),
-                    ChPid ! {datagram, Data},
+                    case is_pid(ChPid) of
+                        true  ->
+                            ChPid ! {datagram, Data};
+                        false ->
+                            io:format("ChId=~p, coap_channel_sup pid=~p, coap_channel pid=~p~n", [ChId, SuPid, ChPid])
+                    end,
                     {noreply, State};
                 % drop this packet
                 {error, _} ->
