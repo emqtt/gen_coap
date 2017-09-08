@@ -20,6 +20,8 @@
 
 -include("coap.hrl").
 
+-define(TAB, ets_coap_channel_pid).
+
 start() ->
     start(normal, []).
 
@@ -31,7 +33,8 @@ stop(_Pid) ->
 
 
 init([]) ->
-    {ok, {{one_for_all, 3, 10}, [
+    create_client_tab(),
+    {ok, {{one_for_one, 3, 10}, [
         {coap_server_registry,
             {coap_server_registry, start_link, []},
             permanent, 5000, worker, []},
@@ -75,5 +78,17 @@ child(SupPid, Id) ->
     [Pid] = [Pid || {Id1, Pid, _, _} <- supervisor:which_children(SupPid),
         Id1 =:= Id],
     Pid.
+
+
+
+create_client_tab() ->
+    case ets:info(?TAB, name) of
+        undefined ->
+            ets:new(?TAB, [set, named_table, public, {write_concurrency, true}]);
+        _ ->
+            ok
+    end.
+
+
 
 % end of file

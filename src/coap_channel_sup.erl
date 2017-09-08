@@ -11,7 +11,7 @@
 -module(coap_channel_sup).
 -behaviour(supervisor).
 
--export([start_link/2, init/1]).
+-export([start_link/2, init/1, get_channel/1]).
 
 start_link(SockPid, ChId) ->
     {ok, SupPid} = supervisor:start_link(?MODULE, []),
@@ -28,6 +28,12 @@ start_link(SockPid, ChId) ->
 init([]) ->
     % crash of any worker will terminate the supervisor and invoke start_link/2 again
     {ok, {{one_for_all, 0, 1}, []}}.
+
+
+get_channel(SupPid) ->
+    List = supervisor:which_children(SupPid),
+    [ChPid] = [Pid || {coap_channel, Pid, _, _} <- List],
+    ChPid.
 
 
 % end of file
