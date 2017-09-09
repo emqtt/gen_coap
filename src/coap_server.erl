@@ -31,7 +31,7 @@ stop(_Pid) ->
 
 
 init([]) ->
-    {ok, {{one_for_all, 3, 10}, [
+    {ok, {{one_for_one, 3, 10}, [
         {coap_server_registry,
             {coap_server_registry, start_link, []},
             permanent, 5000, worker, []},
