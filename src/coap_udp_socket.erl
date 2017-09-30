@@ -99,7 +99,7 @@ handle_info({datagram, {PeerIP, PeerPortNo}, Data}, State=#state{sock=Socket}) -
     {noreply, State};
 handle_info({terminated, SupPid, ChId}, State=#state{chans=Chans}) ->
     Chans2 = dict:erase(ChId, Chans),
-    exit(SupPid, normal),
+    exit(SupPid, kill),  % FIXME: an ugly way to terminate a supervisor
     {noreply, State#state{chans=Chans2}};
 handle_info(Info, State) ->
     io:fwrite("coap_udp_socket unexpected ~p~n", [Info]),
