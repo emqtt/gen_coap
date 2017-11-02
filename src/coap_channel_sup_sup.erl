@@ -12,10 +12,10 @@
 -module(coap_channel_sup_sup).
 -behaviour(supervisor).
 
--export([start_link/0, start_channel/2, delete_channel/2, init/1]).
+-export([start_link/0, start_channel/2, delete_channel/1, init/1]).
 
 start_link() ->
-    supervisor:start_link(?MODULE, []).
+    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 start_channel(SupPid, ChId) ->
     supervisor:start_child(SupPid,
@@ -23,8 +23,9 @@ start_channel(SupPid, ChId) ->
             {coap_channel_sup, start_link, [self(), ChId]},
             temporary, infinity, supervisor, []}).
 
-delete_channel(SupPid, ChId) ->
-    supervisor:terminate_child(SupPid, ChId).
+delete_channel(ChId) ->
+    supervisor:terminate_child(?MODULE, ChId),
+    supervisor:delete_child(?MODULE, ChId).
 
 init([]) ->
     {ok, {{one_for_one, 0, 1}, []}}.
